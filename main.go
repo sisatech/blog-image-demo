@@ -231,6 +231,17 @@ func handle(w http.ResponseWriter, r *http.Request) {
 	path := mux.Vars(r)["path"]
 
 	if path == "" {
+		data, err := Asset("web/index.html")
+		if err != nil {
+			code := http.StatusInternalServerError
+			http.Error(w, err.Error(), code)
+			return
+		}
+		w.Write(data)
+		return
+	}
+
+	if path == "api/pictures" {
 		data, err := json.Marshal(list)
 		if err != nil {
 			code := http.StatusInternalServerError
