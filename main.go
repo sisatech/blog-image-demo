@@ -18,13 +18,48 @@ import (
 	"github.com/nfnt/resize"
 )
 
-var (
-	src         = "."
-	processed   = "processed"
-	placeholder = "placeholder.png"
+// Environment variables.
+const (
+	EnvKeySource      = "DEMO_SOURCE_DIR"
+	EnvKeyProcessed   = "DEMO_PROCESSED_DIR"
+	EnvKeyPlaceholder = "DEMO_PLACEHOLDER_PICTURE"
 )
 
+var (
+	src         = "blog-image-demo.files/pictures"
+	processed   = "blog-image-demo.files/processed"
+	placeholder = "blog-image-demo.files/pictures/vorteil.png"
+)
+
+func initialize() {
+	s := os.Getenv(EnvKeySource)
+	if s != "" {
+		src = s
+	}
+
+	s = os.Getenv(EnvKeyProcessed)
+	if s != "" {
+		processed = s
+	}
+
+	s = os.Getenv(EnvKeyPlaceholder)
+	if s != "" {
+		placeholder = s
+	}
+
+	fmt.Printf("Source Pictures: %s\n", src)
+	fmt.Printf("Processed Pictures: %s\n", src)
+
+	os.RemoveAll(processed)
+	err := os.MkdirAll(processed, 0777)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
 func main() {
+
+	initialize()
 
 	go processPictures()
 
@@ -40,16 +75,9 @@ func main() {
 	}
 
 	log.Fatal(server.ListenAndServe())
-
 }
 
 func processPictures() {
-	os.RemoveAll(processed)
-
-	err := os.MkdirAll(processed, 0777)
-	if err != nil {
-		log.Fatal(err)
-	}
 
 	fis, err := ioutil.ReadDir(src)
 	if err != nil {
@@ -63,7 +91,7 @@ func processPictures() {
 		}
 	}
 
-	fmt.Printf("All files processed\n")
+	fmt.Printf("All files processed.\n")
 }
 
 func process(inpath, outpath string) error {
@@ -71,7 +99,6 @@ func process(inpath, outpath string) error {
 	input, err := primitive.LoadImage(inpath)
 	if err != nil {
 		if err == image.ErrFormat {
-			fmt.Printf("Skipping file '%s': %v\n", inpath, err)
 			return nil
 		}
 		return err
@@ -148,7 +175,6 @@ func process(inpath, outpath string) error {
 func handle(w http.ResponseWriter, r *http.Request) {
 
 	path := mux.Vars(r)["path"]
-
 	path = filepath.Join(processed, path)
 
 	f, err := os.Open(path)
