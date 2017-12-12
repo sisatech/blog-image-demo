@@ -1,3 +1,8 @@
+info:
+  name: Vorteil Blog Demo
+  author: Sisa-Tech Pty Ltd
+  description: A simple application which processes image files provided and outputs an abstract version of each image.
+  version: 1.0
 env:
   vars:
     DEMO_SOURCE_DIR: pictures
