@@ -32,7 +32,12 @@ var (
 	placeholder = "blog-image-demo.files/pictures/vorteil.png"
 )
 
-var list []string
+var list []tuple
+
+type tuple struct {
+	Name  string `json:"name"`
+	Ready bool   `json:"ready"`
+}
 
 func initialize() {
 	s := os.Getenv(EnvKeySource)
@@ -59,7 +64,7 @@ func initialize() {
 		log.Fatal(err)
 	}
 
-	list = make([]string, 0)
+	list = make([]tuple, 0)
 	fis, err := ioutil.ReadDir(src)
 	if err != nil {
 		log.Fatal(err)
@@ -70,7 +75,7 @@ func initialize() {
 		if err != nil {
 			continue
 		}
-		list = append(list, fi.Name())
+		list = append(list, tuple{Name: fi.Name()})
 	}
 }
 
@@ -137,7 +142,6 @@ func process(inpath, outpath string) error {
 		bg.G = 255
 		bg.B = 255
 	}
-	fmt.Printf("%+v\n", bg)
 
 	// run algorithm
 	outputSize := 1024
@@ -193,6 +197,13 @@ func process(inpath, outpath string) error {
 	}
 
 	fmt.Printf("  COMPLETE\n")
+
+	for i := range list {
+		if list[i].Name == filepath.Base(inpath) {
+			list[i].Ready = true
+			break
+		}
+	}
 	return nil
 }
 
