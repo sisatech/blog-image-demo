@@ -48,7 +48,7 @@ func initialize() {
 	}
 
 	fmt.Printf("Source Pictures: %s\n", src)
-	fmt.Printf("Processed Pictures: %s\n", src)
+	fmt.Printf("Processed Pictures: %s\n", processed)
 
 	os.RemoveAll(processed)
 	err := os.MkdirAll(processed, 0777)
