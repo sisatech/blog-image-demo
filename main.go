@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"image"
 	"io"
@@ -31,6 +32,13 @@ var (
 	placeholder = "blog-image-demo.files/pictures/vorteil.png"
 )
 
+var list []tuple
+
+type tuple struct {
+	Name  string `json:"name"`
+	Ready bool   `json:"ready"`
+}
+
 func initialize() {
 	s := os.Getenv(EnvKeySource)
 	if s != "" {
@@ -48,12 +56,26 @@ func initialize() {
 	}
 
 	fmt.Printf("Source Pictures: %s\n", src)
-	fmt.Printf("Processed Pictures: %s\n", src)
+	fmt.Printf("Processed Pictures: %s\n", processed)
 
 	os.RemoveAll(processed)
 	err := os.MkdirAll(processed, 0777)
 	if err != nil {
 		log.Fatal(err)
+	}
+
+	list = make([]tuple, 0)
+	fis, err := ioutil.ReadDir(src)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for _, fi := range fis {
+		_, err = primitive.LoadImage(filepath.Join(src, fi.Name()))
+		if err != nil {
+			continue
+		}
+		list = append(list, tuple{Name: fi.Name()})
 	}
 }
 
@@ -114,6 +136,12 @@ func process(inpath, outpath string) error {
 
 	// background color
 	bg := primitive.MakeColor(primitive.AverageImageColor(input))
+	if bg.A == 255 {
+		// bg.A = 0
+		bg.R = 255
+		bg.G = 255
+		bg.B = 255
+	}
 
 	// run algorithm
 	outputSize := 1024
@@ -169,6 +197,13 @@ func process(inpath, outpath string) error {
 	}
 
 	fmt.Printf("  COMPLETE\n")
+
+	for i := range list {
+		if list[i].Name == filepath.Base(inpath) {
+			list[i].Ready = true
+			break
+		}
+	}
 	return nil
 }
 
@@ -180,6 +215,18 @@ func handle(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 
 	path := mux.Vars(r)["path"]
+
+	if path == "" {
+		data, err := json.Marshal(list)
+		if err != nil {
+			code := http.StatusInternalServerError
+			http.Error(w, http.StatusText(code), code)
+			return
+		}
+		w.Write(data)
+		return
+	}
+
 	path = filepath.Join(processed, path)
 
 	f, err := os.Open(path)

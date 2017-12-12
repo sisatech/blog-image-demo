@@ -3,3 +3,9 @@ env:
     DEMO_SOURCE_DIR: pictures
     DEMO_PROCESSED_DIR: processed
     DEMO_PLACEHOLDER_PICTURE: pictures/vorteil.png
+network:
+  nics:
+  - ip: dhcp
+  ports:
+  - port: 8080
+    protocol: http
