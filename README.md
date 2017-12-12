@@ -1,6 +1,9 @@
 # blog-image-demo
 
 ### Description
+This demo app creates a simple website to serve pictures. Just to make it interesting, it uses "github.com/fogleman/primitive" to process the picture files into artistic versions of themselves. It does this processing after it has booted up, and the processing can take some time.
+
+Visit localhost
 
 ### Build Process
 ```sh
