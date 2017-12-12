@@ -8,21 +8,62 @@
 </head>
 
 <body>
-        <div id="test" class="">
-                <img id="img" alt="" src='http://127.0.0.1:8080/vorteil.png'/>
+        <div class="" style="padding: 0px 20% 0px 20%;">
+                <h1 style="text-align:center;">Vorteil Demo App</h1>
+                <p style="text-align:center;">
+                        This app takes the provided images and processes them in to abstract vector images. 
+                        Processing numerous image files may take some time.
+                </p>
+                <ul id="img-list" style="max-height:250px; overflow-y:auto;">
+
+                </ul>
+                <hr>
+        </div>
+        <div id="test" style="text-align:center;">
+                <img id="img" alt="" style="max-height: 50vh;"/>
         </div>
         <script type="text/javascript">
                 $(document).ready(function() {
 
-                        $.ajax({
-                                type: 'GET',
-                                url: 'http://127.0.0.1:8080/vorteil2.png',
-                                responseType: 'arrayBuffer'
-                        }).fail(function(data) {
-                                document.getElementById("img").parentNode.removeChild(document.getElementById("img"));
-                        })
-                        
+                        function refreshList() {
+                                $.ajax({
+                                        type: 'GET',
+                                        url: 'http://127.0.0.1:8080/'
+                                }).done(function(data){
+                                        parseImageList(JSON.parse(data));
+                                })
+                        }
+
+                        refreshList();
+                        setInterval(refreshList, 3000);
                 })
+
+                function parseImageList(data) {
+
+                        let ul = document.getElementById("img-list")
+                        while(ul.hasChildNodes()) {
+                                ul.removeChild(ul.lastChild);
+                        }
+
+                        for (i = 0; i < data.length; i++){
+                                let obj = data[i]
+                                let li = document.createElement("LI")
+                                if (obj.ready != true) {
+                                        li.innerHTML = obj.name + " (processing...)"
+                                } else {
+                                        let a = document.createElement("A")
+                                        a.href="#!"
+                                        a.innerHTML = obj.name
+                                        li.onclick = function() {
+                                                console.log("test");
+                                                document.getElementById("img").src = "http://127.0.0.1:8080/" + obj.name;
+                                        };
+                                        li.appendChild(a)
+                                }
+                                ul.appendChild(li)
+                        }
+                }
+
         </script>
 </body>
 
