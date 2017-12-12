@@ -12,7 +12,6 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/fogleman/primitive/primitive"
@@ -139,6 +138,8 @@ func main() {
 		MaxHeaderBytes: 1 << 20,
 	}
 
+	fmt.Printf("Listening on port: 8080\n")
+
 	log.Fatal(server.ListenAndServe())
 }
 
@@ -189,43 +190,20 @@ func process(inpath, outpath string) error {
 
 	count := polygons
 
-	Nth := 1
-
-	tmp, err := ioutil.TempFile("", "")
-	if err != nil {
-		return err
-	}
-	output := tmp.Name()
-	defer os.Remove(output)
-	tmp.Close()
-
 	mode := 1
 	alpha := 128
 	repeat := 0
 
-	// fmt.Printf("temp file: %s\n", tmp.Name())
-
 	for i := 0; i < count; i++ {
 		frame++
-
-		// fmt.Printf("frame: %v\n", i)
 
 		// find optimal shape and add it to the model
 		model.Step(primitive.ShapeType(mode), alpha, repeat)
 
-		// write output image(s)
-
-		ext := strings.ToLower(filepath.Ext(output))
-		percent := strings.Contains(output, "%")
-		saveFrames := percent && ext != ".gif"
-		saveFrames = saveFrames && frame%Nth == 0
 		last := i == count-1
 		var path string
-		if saveFrames || last {
+		if last {
 			path = outpath
-			if percent {
-				path = fmt.Sprintf(outpath, frame)
-			}
 			err = primitive.SavePNG(path, model.Context.Image())
 			if err != nil {
 				return err
