@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
@@ -24,12 +25,18 @@ const (
 	EnvKeySource      = "DEMO_SOURCE_DIR"
 	EnvKeyProcessed   = "DEMO_PROCESSED_DIR"
 	EnvKeyPlaceholder = "DEMO_PLACEHOLDER_PICTURE"
+	EnvKeyPolygons    = "DEMO_POLYGONS"
+	EnvKeyPixels      = "DEMO_PIXELS"
+	EnvKeyResolution  = "DEMO_RESOLUTION"
 )
 
 var (
 	src         = "blog-image-demo.files/pictures"
 	processed   = "blog-image-demo.files/processed"
 	placeholder = "blog-image-demo.files/pictures/vorteil.png"
+	polygons    = 50
+	resolution  = 64
+	pixels      = 512
 )
 
 var list []tuple
@@ -55,8 +62,44 @@ func initialize() {
 		placeholder = s
 	}
 
+	s = os.Getenv(EnvKeyPolygons)
+	if s != "" {
+		x, err := strconv.Atoi(s)
+		if err != nil {
+			log.Fatal(err)
+		}
+		if x <= 1000 && x >= 10 {
+			polygons = x
+		}
+	}
+
+	s = os.Getenv(EnvKeyResolution)
+	if s != "" {
+		x, err := strconv.Atoi(s)
+		if err != nil {
+			log.Fatal(err)
+		}
+		if x <= 1024 && x >= 64 {
+			resolution = x
+		}
+	}
+
+	s = os.Getenv(EnvKeyPixels)
+	if s != "" {
+		x, err := strconv.Atoi(s)
+		if err != nil {
+			log.Fatal(err)
+		}
+		if x <= 4096 && x >= 64 {
+			pixels = x
+		}
+	}
+
 	fmt.Printf("Source Pictures: %s\n", src)
 	fmt.Printf("Processed Pictures: %s\n", processed)
+	fmt.Printf("Polygons Per Picture: %v\n", polygons)
+	fmt.Printf("Processing Resolution: %v\n", resolution)
+	fmt.Printf("Thumbnail Pixel Width: %v\n", pixels)
 
 	os.RemoveAll(processed)
 	err := os.MkdirAll(processed, 0777)
@@ -128,7 +171,7 @@ func process(inpath, outpath string) error {
 
 	fmt.Printf("Processing file: %s", inpath)
 
-	size := uint(256)
+	size := uint(resolution)
 
 	input = resize.Thumbnail(size, size, input, resize.Bilinear)
 
@@ -136,21 +179,15 @@ func process(inpath, outpath string) error {
 
 	// background color
 	bg := primitive.MakeColor(primitive.AverageImageColor(input))
-	if bg.A == 255 {
-		// bg.A = 0
-		bg.R = 255
-		bg.G = 255
-		bg.B = 255
-	}
 
 	// run algorithm
-	outputSize := 1024
+	outputSize := pixels
 	workers := 1
 
 	model := primitive.NewModel(input, bg, outputSize, workers)
 	frame := 0
 
-	count := 100
+	count := polygons
 
 	Nth := 1
 
@@ -209,7 +246,6 @@ func process(inpath, outpath string) error {
 
 func handle(w http.ResponseWriter, r *http.Request) {
 
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "PUT, GET, POST, DELETE, OPTIONS")
 	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
