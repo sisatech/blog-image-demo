@@ -9,24 +9,19 @@
 
 <body>
         <div id="test" class="">
-
+                <img id="img" alt="" src='http://127.0.0.1:8080/vorteil.png'/>
         </div>
         <script type="text/javascript">
                 $(document).ready(function() {
 
-                        let x = "test"
-                        console.log(x);
-
                         $.ajax({
                                 type: 'GET',
-                                url: 'http://127.0.0.1:8080/test'
-                        }).done(function(data) {
-                                alert(data);
-                                document.getElementById("test").innerHTML = data
+                                url: 'http://127.0.0.1:8080/vorteil2.png',
+                                responseType: 'arrayBuffer'
                         }).fail(function(data) {
-                                console.log(data);
+                                document.getElementById("img").parentNode.removeChild(document.getElementById("img"));
                         })
-
+                        
                 })
         </script>
 </body>

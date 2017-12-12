@@ -174,6 +174,11 @@ func process(inpath, outpath string) error {
 
 func handle(w http.ResponseWriter, r *http.Request) {
 
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "PUT, GET, POST, DELETE, OPTIONS")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+
 	path := mux.Vars(r)["path"]
 	path = filepath.Join(processed, path)
 
