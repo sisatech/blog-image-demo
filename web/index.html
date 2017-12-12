@@ -11,7 +11,7 @@
         <div class="" style="padding: 0px 20% 0px 20%;">
                 <h1 style="text-align:center;">Vorteil Demo App</h1>
                 <p style="text-align:center;">
-                        This app takes the provided images and processes them in to abstract vector images. 
+                        This app takes the provided images and processes them in to abstract vector images.
                         Processing numerous image files may take some time.
                 </p>
                 <ul id="img-list" style="max-height:250px; overflow-y:auto;">
@@ -28,7 +28,7 @@
                         function refreshList() {
                                 $.ajax({
                                         type: 'GET',
-                                        url: 'http://127.0.0.1:8080/'
+                                        url: '/api/pictures'
                                 }).done(function(data){
                                         parseImageList(JSON.parse(data));
                                 })
@@ -56,7 +56,7 @@
                                         a.innerHTML = obj.name
                                         li.onclick = function() {
                                                 console.log("test");
-                                                document.getElementById("img").src = "http://127.0.0.1:8080/" + obj.name;
+                                                document.getElementById("img").src = "/" + obj.name;
                                         };
                                         li.appendChild(a)
                                 }
